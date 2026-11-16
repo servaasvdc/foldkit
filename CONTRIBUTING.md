@@ -14,10 +14,7 @@ pnpm install
 
 Node `^22.22.2 || ^24.15.0 || >=26.0.0` and pnpm `>=11`. The repository pins `pnpm@11.8.0` via `packageManager`, so Corepack will select the right version on its own.
 
-`pnpm install` also installs the git hooks. Two of them run:
-
-- **commit-msg** rejects a `Co-Authored-By` line naming Claude.
-- **pre-push** runs the full check suite described below.
+`pnpm install` also installs the git hooks. The `commit-msg` hook rejects a `Co-Authored-By` line naming Claude.
 
 To run the Counter example while changing library code, build the libraries in watch mode, then start the example in another terminal:
 
@@ -44,15 +41,7 @@ git subtree pull --prefix=repos/effect https://github.com/Effect-TS/effect.git "
 
 ## Before You Push
 
-The pre-push hook runs `pnpm pre-push`, which is the same suite CI runs. You can run it yourself at any point:
-
-```sh
-pnpm pre-push
-```
-
-It takes several minutes because it builds every package, typechecks the whole workspace, runs every test suite, and finishes with a Chromium end-to-end pass over the website. That is intentional: a green local run means a green CI run.
-
-For a faster inner loop while working, the individual pieces are available:
+CI is the gate. It runs on every pull request, and nothing runs on push, so pushing is always fast. Run the checks most likely to catch your change as you work:
 
 ```sh
 pnpm lint
@@ -63,17 +52,17 @@ pnpm format
 
 If a typecheck reports something like `Cannot find module 'foldkit'`, the libraries have not been built. Foldkit's `exports` map points at `dist/`, so anything depending on it needs a build before it will typecheck. Run `pnpm build` once, or `pnpm dev:libs` to rebuild in watch mode while you work.
 
-Beyond the usual lint, typecheck, and test steps, the suite enforces a few repository-specific rules that are easy to trip over:
+Beyond the usual lint, typecheck, and test steps, CI enforces a few repository-specific rules that are easy to trip over:
 
-| Check                              | Rule                                                                                                                                                               |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `check:no-claude-comments`         | No unresolved `CLAUDE:` comments in tracked files, apart from the checker itself and the two documents describing the rule. Resolve or remove them before pushing. |
-| `check:commit-message-line-length` | Commit message prose wraps at 80 characters. Unbreakable lines such as URLs are exempt.                                                                            |
-| `check:no-major-changesets`        | No `major` changesets. Foldkit is pre-1.0, so breaking changes ship as `minor`.                                                                                    |
-| `check:changeset-unwrapped`        | Changeset prose is not hard-wrapped. Write each paragraph as one line.                                                                                             |
-| `changeset status`                 | Every change to a publishable package has a changeset.                                                                                                             |
-| `check:dead-code`                  | No unused files, exports, or dependencies.                                                                                                                         |
-| `check:ui-subpath-exports`         | Every `packages/ui/src` component with a `public.ts` has an exports entry, a matching main-entry namespace and an example alias pointing at its source.            |
+| Check                              | Rule                                                                                                                                                    |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `check:no-claude-comments`         | No unresolved `CLAUDE:` comments in tracked files, apart from the checker itself and the two documents describing the rule.                             |
+| `check:commit-message-line-length` | Commit message prose wraps at 80 characters. Unbreakable lines such as URLs are exempt.                                                                 |
+| `check:no-major-changesets`        | No `major` changesets. Foldkit is pre-1.0, so breaking changes ship as `minor`.                                                                         |
+| `check:changeset-unwrapped`        | Changeset prose is not hard-wrapped. Write each paragraph as one line.                                                                                  |
+| `changeset status`                 | Every change to a publishable package has a changeset.                                                                                                  |
+| `check:dead-code`                  | No unused files, exports, or dependencies.                                                                                                              |
+| `check:ui-subpath-exports`         | Every `packages/ui/src` component with a `public.ts` has an exports entry, a matching main-entry namespace and an example alias pointing at its source. |
 
 ## Commits
 
