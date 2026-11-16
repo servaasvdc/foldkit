@@ -53,7 +53,7 @@ If you find problems, fix them (directly, or by sending the subagent back) and f
 
 ### 5. Push and open the PR
 
-Push with `git push -u origin claude/<slug>`. No hook runs on push, so CI is the gate and reports on the pull request; confirm the remote ref equals your local HEAD. Retry on network failure up to 4 times with exponential backoff.
+Push with `git push -u origin claude/<slug>`. The pre-push hook runs the full suite (format, changeset status, lint, dead-code, build, all-package typecheck, test, website e2e) and takes several minutes, so run the push in the background and then confirm the remote ref equals your local HEAD. Retry on network failure up to 4 times with exponential backoff.
 
 Check for a PR template (`.github/pull_request_template.md`, `.github/PULL_REQUEST_TEMPLATE.md`, root or `docs/PULL_REQUEST_TEMPLATE.md`). If one exists, populate its sections. Otherwise write the body plainly: what the change is and why, what you changed, any design decision and the alternative you rejected, and how you verified. If the change resolves a tracked issue, add `Fixes #<number>.`. End with:
 
